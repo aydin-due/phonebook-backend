@@ -1,7 +1,10 @@
+require('dotenv').config()
 const express = require('express')
-const app = express()
 const morgan = require('morgan')
 const cors = require('cors')
+const Phonebook = require('./models/phonebook')
+
+const app = express()
 app.use(express.json())
 app.use(cors())
 app.use(express.static('dist'))
@@ -38,7 +41,7 @@ let persons = [
 ]
 
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+    Phonebook.find({}).then(ppl => res.json(ppl))
 })
 
 app.get('/info', (req, res) => {
@@ -63,26 +66,27 @@ app.delete('/api/persons/:id', (req, res) => {
 })
 
 app.post('/api/persons', (req, res) => {
-    const person = {
-        id: Math.floor(Math.random() * 1000000),
-        name: req.body.name,
-        number: req.body.number,
-    }
+    const body = req.body
 
-    if (!person.name || !person.number) {
+    if (body === undefined){
         return res.status(400).json({
-            error: 'name or number missing'
+            error: 'content missing'
         })
     }
+    const person = new Phonebook({
+        name: body.name,
+        number: body.number
+    })
+    /*
 
     if (persons.find(p => p.name === person.name)) {
         return res.status(400).json({
             error: 'name must be unique'
         })
     }
+    */
 
-    persons = persons.concat(person)
-    res.json(person)
+    person.save().then(savedPerson => res.json(savedPerson))
 })
 
 const PORT = process.env.PORT || 3001
