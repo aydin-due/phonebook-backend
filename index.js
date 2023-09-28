@@ -46,17 +46,20 @@ app.get('/api/persons', (req, res) => {
 
 app.get('/info', (req, res) => {
     const date = new Date()
-    res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${date}</p>`)
+    Phonebook.find({}).then(ppl => 
+        res.send(`<p>Phonebook has info for ${ppl.length} people</p><p>${date}</p>`))
 })
 
-app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+app.get('/api/persons/:id', (req, res, next) => {
+    Phonebook.findById(req.params.id)
+    .then(person => {
+        if (person) {
+            res.json(person)
+        } else {
+            res.status(400).end()
+        }
+    })
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (req, res) => {
