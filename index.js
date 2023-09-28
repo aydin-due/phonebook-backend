@@ -60,9 +60,9 @@ app.get('/api/persons/:id', (req, res) => {
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    persons = persons.filter(p => p.id !== id)
-    res.status(204).end()
+    Phonebook.findByIdAndDelete(req.params.id)
+    .then(result => res.status(204).end())
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (req, res) => {
@@ -77,8 +77,8 @@ app.post('/api/persons', (req, res) => {
         name: body.name,
         number: body.number
     })
-    /*
 
+    /*
     if (persons.find(p => p.name === person.name)) {
         return res.status(400).json({
             error: 'name must be unique'
